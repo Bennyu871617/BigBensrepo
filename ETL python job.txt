@@ -1,0 +1,46 @@
+from sagemaker.sklearn.processing import SKLearnProcessor
+
+sklearn_processor = SKLearnProcessor(framework_version='0.20.0',
+                                     role=<role>,
+                                     instance_type='ml.m5.xlarge',
+                                     instance_count=1)
+
+from sagemaker.processing import ProcessingInput, ProcessingOutput
+from sagemaker.workflow.steps import ProcessingStep
+
+step_process = ProcessingStep(
+    name="AbaloneProcess",
+    processor=sklearn_processor,
+    inputs=[
+      ProcessingInput(source=<input_data>, destination="/opt/ml/processing/input"),
+    ],
+    outputs=[
+        ProcessingOutput(output_name="train", source="/opt/ml/processing/train"),
+        ProcessingOutput(output_name="validation", source="/opt/ml/processing/validation"),
+        ProcessingOutput(output_name="test", source="/opt/ml/processing/test")
+    ],
+    code="abalone/preprocessing.py"
+
+from sagemaker.spark.processing import PySparkProcessor
+
+pyspark_processor = PySparkProcessor(framework_version='2.4',
+                                     role=<role>,
+                                     instance_type='ml.m5.xlarge',
+                                     instance_count=1)
+
+from sagemaker.processing import ProcessingInput, ProcessingOutput
+
+run_args = pyspark_processor.get_run_args(
+    "preprocess.py",
+    inputs=[
+      ProcessingInput(source=<input_data>, destination="/opt/ml/processing/input"),
+    ],
+    outputs=[
+        ProcessingOutput(output_name="train", source="/opt/ml/processing/train"),
+        ProcessingOutput(output_name="validation", source="/opt/ml/processing/validation"),
+        ProcessingOutput(output_name="test", source="/opt/ml/processing/test")
+    ],
+    arguments=None
+)
+
+
